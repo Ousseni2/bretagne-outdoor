@@ -1,109 +1,137 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#173f35">
 <title>Bretagne Outdoor</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font:16px -apple-system,BlinkMacSystemFont,sans-serif;background:#f3f6f3;color:#20352d}
-header{background:#173f35;color:white;padding:28px 20px;border-radius:0 0 24px 24px}
-h1{margin:0;font-size:27px}
-header p{color:#d5e6dc}
-main{padding:18px;max-width:600px;margin:auto}
-.card{background:white;padding:18px;border-radius:17px;margin:14px 0;box-shadow:0 2px 8px #0000000b}
-label{display:block;font-weight:600;margin:14px 0 7px}
-select,button{width:100%;padding:13px;border-radius:10px;font-size:16px}
-select{border:1px solid #ccd6ce;background:white}
-button{border:0;background:#246b4e;color:white;font-weight:600;margin-top:12px}
-.secondary{background:#e3eee7;color:#173f35}
-.small{font-size:13px;color:#63736a}
-.weather{font-size:25px;font-weight:700}
+body{margin:0;background:#f2f6f2;color:#20352d;font-family:-apple-system,BlinkMacSystemFont,Arial,sans-serif;line-height:1.5}
+header{background:#173f35;color:white;padding:35px 22px 40px;border-radius:0 0 28px 28px}
+header p{color:#d8e7dd;font-size:18px}
+main{max-width:700px;margin:auto;padding:18px}
+.card{background:white;padding:22px;border-radius:22px;margin-bottom:18px;box-shadow:0 5px 18px #173f3510}
+h1{font-size:34px;line-height:1.15;margin:12px 0}
+h2{font-size:23px;margin-top:0}
+.temp{font-size:42px;font-weight:800}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:15px 0}
+.metric{background:#f2f6f2;padding:10px;border-radius:12px;font-size:14px}
+label{display:block;font-weight:700;margin:14px 0}
+select,button{width:100%;padding:14px;border-radius:13px;font-size:16px}
+select{border:1px solid #ccd8cf;background:white;margin-top:6px}
+button,.btn{display:block;background:#356b52;color:white;border:0;font-weight:700;text-align:center;text-decoration:none;margin-top:14px;cursor:pointer}
+.secondary{background:#e4eee7;color:#173f35}
+.result{border:1px solid #d8e1da;border-radius:15px;padding:16px;margin-top:18px}
+.status{font-weight:800}
+.note{color:#627269;font-size:13px}
+.day{font-size:14px;margin-top:8px}
+@media(min-width:500px){.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
 </style>
 </head>
 <body>
 <header>
 <div>🌿 BRETAGNE OUTDOOR</div>
-<h1>La bonne sortie, au bon moment.</h1>
+<h1>La bonne sortie,<br>au bon moment.</h1>
 <p>Explore la Bretagne selon la météo.</p>
 </header>
 <main>
 <section class="card">
 <h2>🌦️ Météo à Guilers</h2>
-<div id="weather" class="weather">Chargement...</div>
-<p id="details">Récupération des prévisions météo.</p>
+<div class="temp" id="temp">Chargement…</div>
+<p id="conditions">Récupération des conditions météo…</p>
+<div class="metrics">
+<div class="metric">💨 Vent<br><strong id="wind">—</strong></div>
+<div class="metric">🌬️ Rafales<br><strong id="gust">—</strong></div>
+<div class="metric">🌧️ Pluie<br><strong id="rain">—</strong></div>
+</div>
 <button class="secondary" onclick="loadWeather()">Actualiser la météo</button>
-<p class="small">Prévisions fournies par Open-Meteo.</p>
+<div id="forecast"></div>
+<p class="note">Données Open-Meteo. Les conditions peuvent changer pendant ta sortie.</p>
 </section>
+
 <section class="card">
 <h2>🥾 Trouve ta sortie</h2>
-<label for="activity">Activité</label>
+<div class="formrow">
+<label>Activité
 <select id="activity">
-<option>Randonnée</option>
-<option>Vélo</option>
-<option>Gravel</option>
-</select>
-<label for="duration">Temps disponible</label>
+<option value="Randonnée">Randonnée</option>
+<option value="Vélo">Vélo</option>
+<option value="Gravel">Gravel</option>
+</select></label>
+<label>Temps disponible
 <select id="duration">
-<option>1 heure</option>
-<option selected>2 heures</option>
-<option>Une demi-journée</option>
-</select>
-<label for="level">Niveau</label>
+<option>1 heure</option><option selected>2 heures</option>
+<option>3 heures</option><option>4 heures ou plus</option>
+</select></label>
+</div>
+<label>Niveau
 <select id="level">
-<option>Facile</option>
-<option selected>Modéré</option>
-<option>Sportif</option>
-</select>
+<option>Débutant / tranquille</option>
+<option selected>Modéré</option><option>Sportif</option>
+</select></label>
 <button onclick="recommend()">Trouver ma sortie</button>
-<div id="result" aria-live="polite"></div>
+<div class="result" id="result" aria-live="polite">
+Choisis tes préférences puis appuie sur « Trouver ma sortie ».
+</div>
 </section>
+
 <section class="card">
 <h2>🗺️ Explorer les environs</h2>
-<p>Consulte la carte autour de Guilers pour repérer les chemins et préparer ton itinéraire.</p>
-<button onclick="window.open('https://www.openstreetmap.org/#map=13/48.425/-4.558','_blank')">Ouvrir la carte</button>
+<p>Repère les chemins autour de Guilers et prépare ton itinéraire.</p>
+<a class="btn" style="padding:14px;border-radius:13px" target="_blank" rel="noopener" href="https://www.openstreetmap.org/#map=13/48.425/-4.558">Ouvrir la carte</a>
+<a class="btn secondary" style="padding:14px;border-radius:13px" target="_blank" rel="noopener" href="https://meteofrance.com/">Consulter Météo-France</a>
 </section>
-<p class="small">Prototype en test. Vérifie les alertes météo, l'état des sentiers et la sécurité avant chaque sortie. Les itinéraires personnalisés et l'export GPX seront ajoutés ultérieurement.</p>
+<p class="note">Prototype en test. Vérifie les alertes, l'état des chemins et les prévisions sur toute la durée du parcours. Les itinéraires personnalisés et l'export GPX ne sont pas encore disponibles.</p>
 </main>
+
 <script>
-let forecast=null;
+let meteo=null;
 async function loadWeather(){
-const box=document.getElementById('weather');
-const details=document.getElementById('details');
-box.textContent='Chargement...';
+document.getElementById("temp").textContent="Chargement…";
 try{
-const url='https://api.open-meteo.com/v1/forecast?latitude=48.425&longitude=-4.558&current=temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m&hourly=precipitation_probability&forecast_days=1&timezone=Europe%2FParis';
-const response=await fetch(url);
-if(!response.ok)throw Error('Météo indisponible');
-forecast=await response.json();
-const c=forecast.current;
-box.textContent=Math.round(c.temperature_2m)+' °C';
-details.textContent='Pluie actuelle : '+c.precipitation+' mm · Vent : '+Math.round(c.wind_speed_10m)+' km/h · Rafales : '+Math.round(c.wind_gusts_10m)+' km/h.';
+const url="https://api.open-meteo.com/v1/forecast?latitude=48.425&longitude=-4.558&current=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_gusts_10m_max&forecast_days=3&timezone=Europe%2FParis";
+const r=await fetch(url);
+if(!r.ok)throw Error();
+const d=await r.json(),c=d.current;
+meteo={temp:c.temperature_2m,wind:c.wind_speed_10m,gust:c.wind_gusts_10m,rain:c.precipitation,code:c.weather_code};
+const codes={0:"Ciel dégagé",1:"Peu nuageux",2:"Partiellement nuageux",3:"Couvert",45:"Brouillard",51:"Bruine",61:"Pluie faible",63:"Pluie modérée",65:"Pluie forte",80:"Averses",81:"Averses",82:"Fortes averses",95:"Orage",96:"Orage et grêle",99:"Orage violent"};
+document.getElementById("temp").textContent=Math.round(c.temperature_2m)+" °C";
+document.getElementById("conditions").textContent=(codes[c.weather_code]||"Conditions variables")+" · Mise à jour : "+new Date(c.time).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+document.getElementById("wind").textContent=Math.round(c.wind_speed_10m)+" km/h";
+document.getElementById("gust").textContent=Math.round(c.wind_gusts_10m)+" km/h";
+document.getElementById("rain").textContent=c.precipitation+" mm";
+document.getElementById("forecast").innerHTML="<h3>Prévisions sur 3 jours</h3>"+d.daily.time.map((date,i)=>"<div class='day'><strong>"+new Date(date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric'})+"</strong> · "+Math.round(d.daily.temperature_2m_min[i])+"–"+Math.round(d.daily.temperature_2m_max[i])+" °C · Pluie : "+(d.daily.precipitation_probability_max[i]??"—")+" % · Rafales max : "+Math.round(d.daily.wind_gusts_10m_max[i])+" km/h</div>").join("");
 recommend();
 }catch(e){
-box.textContent='Météo indisponible';
-details.textContent='Vérifie ta connexion puis réessaie.';
-forecast=null;
+meteo=null;
+document.getElementById("temp").textContent="Météo indisponible";
+document.getElementById("conditions").textContent="Vérifie ta connexion ou consulte Météo-France.";
+document.getElementById("forecast").innerHTML="";
+recommend();
 }
 }
 function recommend(){
-const activity=document.getElementById('activity').value;
-const duration=document.getElementById('duration').value;
-const level=document.getElementById('level').value;
-const out=document.getElementById('result');
-if(!forecast){
-out.innerHTML='<p>Charge d’abord la météo pour obtenir un conseil adapté.</p>';
-return;
+const a=document.getElementById("activity").value;
+const d=document.getElementById("duration").value;
+const l=document.getElementById("level").value;
+let title="Conditions à vérifier",advice="Consulte les prévisions officielles avant de partir.",tips="";
+if(!meteo){advice="La météo n'est pas disponible. Vérifie Météo-France et les alertes locales avant de décider."}
+else if(meteo.code>=95||meteo.gust>=90||meteo.wind>=65||meteo.rain>=7){
+title="⛔ Sortie déconseillée";
+advice="Conditions potentiellement dangereuses : mieux vaut reporter la sortie.";
+tips="Évite les zones exposées, les falaises et les secteurs boisés par grand vent.";
+}else if(meteo.gust>=60||meteo.wind>=40||meteo.rain>=2){
+title="⚠️ Prudence renforcée";
+advice="Choisis plutôt un parcours court et abrité, avec un retour facile.";
+tips="Évite les zones exposées et contrôle les prévisions pendant toute la sortie.";
+}else{
+title="✅ Sortie envisageable";
+advice="Les conditions actuelles peuvent permettre une sortie, sous réserve des prévisions sur tout le parcours.";
+tips="Emporte de l'eau, un téléphone chargé et des vêtements adaptés.";
 }
-const c=forecast.current;
-let advice='Conditions à vérifier avant de partir.';
-if(c.precipitation>=1)advice='Il pleut actuellement : prévois une tenue imperméable et vérifie l’état du terrain.';
-else if(c.wind_gusts_10m>=50)advice='Rafales fortes : évite les zones exposées et envisage de reporter la sortie.';
-else if(c.wind_speed_10m>=30)advice='Vent soutenu : privilégie un parcours abrité et reste prudent.';
-else advice='Conditions météo plutôt favorables à une sortie, sous réserve des prévisions à l’heure de départ.';
-out.innerHTML='<h3>Ta sortie</h3><p><b>'+activity+'</b> · '+duration+' · niveau '+level.toLowerCase()+'</p><p>'+advice+'</p><p class="small">Conseil basé sur la météo actuelle à Guilers, pas sur toute la durée du parcours.</p><button onclick="window.open(\'https://www.openstreetmap.org/#map=13/48.425/-4.558\',\'_blank\')">Explorer les chemins sur la carte</button>';
+let specific=a==="Randonnée"?"Privilégie les sentiers balisés.":a==="Vélo"?"Privilégie les voies cyclables et les routes calmes ; attention au vent latéral.":"Vérifie que les chemins sont autorisés et praticables, notamment après la pluie.";
+document.getElementById("result").innerHTML="<div class='status'>"+title+"</div><h3>"+a+" · "+d+" · "+l+"</h3><p>"+advice+"</p><p>"+specific+"</p><p>"+tips+"</p><p>"+(d==="4 heures ou plus"?"Prévois des pauses et une marge importante pour le retour.":"Garde une marge pour rentrer avant que les conditions changent.")+"</p><p class='note'>Conseil météo pour Guilers, pas une vérification de l'itinéraire réel.</p><a class='btn' style='padding:14px;border-radius:13px' target='_blank' rel='noopener' href='https://www.openstreetmap.org/#map=13/48.425/-4.558'>Explorer les chemins sur la carte</a>";
 }
 loadWeather();
 </script>
