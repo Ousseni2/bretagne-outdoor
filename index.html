@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173f35">
+<title>Bretagne Outdoor</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:16px -apple-system,BlinkMacSystemFont,sans-serif;background:#f3f6f3;color:#20352d}
+header{background:#173f35;color:white;padding:28px 20px;border-radius:0 0 24px 24px}
+h1{margin:0;font-size:27px}
+header p{color:#d5e6dc}
+main{padding:18px;max-width:600px;margin:auto}
+.card{background:white;padding:18px;border-radius:17px;margin:14px 0;box-shadow:0 2px 8px #0000000b}
+label{display:block;font-weight:600;margin:14px 0 7px}
+select,button{width:100%;padding:13px;border-radius:10px;font-size:16px}
+select{border:1px solid #ccd6ce;background:white}
+button{border:0;background:#246b4e;color:white;font-weight:600;margin-top:12px}
+.secondary{background:#e3eee7;color:#173f35}
+.small{font-size:13px;color:#63736a}
+.weather{font-size:25px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+<div>🌿 BRETAGNE OUTDOOR</div>
+<h1>La bonne sortie, au bon moment.</h1>
+<p>Explore la Bretagne selon la météo.</p>
+</header>
+<main>
+<section class="card">
+<h2>🌦️ Météo à Guilers</h2>
+<div id="weather" class="weather">Chargement...</div>
+<p id="details">Récupération des prévisions météo.</p>
+<button class="secondary" onclick="loadWeather()">Actualiser la météo</button>
+<p class="small">Prévisions fournies par Open-Meteo.</p>
+</section>
+<section class="card">
+<h2>🥾 Trouve ta sortie</h2>
+<label for="activity">Activité</label>
+<select id="activity">
+<option>Randonnée</option>
+<option>Vélo</option>
+<option>Gravel</option>
+</select>
+<label for="duration">Temps disponible</label>
+<select id="duration">
+<option>1 heure</option>
+<option selected>2 heures</option>
+<option>Une demi-journée</option>
+</select>
+<label for="level">Niveau</label>
+<select id="level">
+<option>Facile</option>
+<option selected>Modéré</option>
+<option>Sportif</option>
+</select>
+<button onclick="recommend()">Trouver ma sortie</button>
+<div id="result" aria-live="polite"></div>
+</section>
+<section class="card">
+<h2>🗺️ Explorer les environs</h2>
+<p>Consulte la carte autour de Guilers pour repérer les chemins et préparer ton itinéraire.</p>
+<button onclick="window.open('https://www.openstreetmap.org/#map=13/48.425/-4.558','_blank')">Ouvrir la carte</button>
+</section>
+<p class="small">Prototype en test. Vérifie les alertes météo, l'état des sentiers et la sécurité avant chaque sortie. Les itinéraires personnalisés et l'export GPX seront ajoutés ultérieurement.</p>
+</main>
+<script>
+let forecast=null;
+async function loadWeather(){
+const box=document.getElementById('weather');
+const details=document.getElementById('details');
+box.textContent='Chargement...';
+try{
+const url='https://api.open-meteo.com/v1/forecast?latitude=48.425&longitude=-4.558&current=temperature_2m,precipitation,wind_speed_10m,wind_gusts_10m&hourly=precipitation_probability&forecast_days=1&timezone=Europe%2FParis';
+const response=await fetch(url);
+if(!response.ok)throw Error('Météo indisponible');
+forecast=await response.json();
+const c=forecast.current;
+box.textContent=Math.round(c.temperature_2m)+' °C';
+details.textContent='Pluie actuelle : '+c.precipitation+' mm · Vent : '+Math.round(c.wind_speed_10m)+' km/h · Rafales : '+Math.round(c.wind_gusts_10m)+' km/h.';
+recommend();
+}catch(e){
+box.textContent='Météo indisponible';
+details.textContent='Vérifie ta connexion puis réessaie.';
+forecast=null;
+}
+}
+function recommend(){
+const activity=document.getElementById('activity').value;
+const duration=document.getElementById('duration').value;
+const level=document.getElementById('level').value;
+const out=document.getElementById('result');
+if(!forecast){
+out.innerHTML='<p>Charge d’abord la météo pour obtenir un conseil adapté.</p>';
+return;
+}
+const c=forecast.current;
+let advice='Conditions à vérifier avant de partir.';
+if(c.precipitation>=1)advice='Il pleut actuellement : prévois une tenue imperméable et vérifie l’état du terrain.';
+else if(c.wind_gusts_10m>=50)advice='Rafales fortes : évite les zones exposées et envisage de reporter la sortie.';
+else if(c.wind_speed_10m>=30)advice='Vent soutenu : privilégie un parcours abrité et reste prudent.';
+else advice='Conditions météo plutôt favorables à une sortie, sous réserve des prévisions à l’heure de départ.';
+out.innerHTML='<h3>Ta sortie</h3><p><b>'+activity+'</b> · '+duration+' · niveau '+level.toLowerCase()+'</p><p>'+advice+'</p><p class="small">Conseil basé sur la météo actuelle à Guilers, pas sur toute la durée du parcours.</p><button onclick="window.open(\'https://www.openstreetmap.org/#map=13/48.425/-4.558\',\'_blank\')">Explorer les chemins sur la carte</button>';
+}
+loadWeather();
+</script>
+</body>
+</html>
